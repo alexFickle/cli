@@ -4,6 +4,7 @@
 #pragma once
 
 #include "cli/Parse.hpp"
+#include "cli/details/ArrayTraits.hpp"
 
 #include <array>
 #include <cstddef>
@@ -39,16 +40,6 @@ private:
 		}
 	}
 
-	template <typename T> struct IsStdArray
-	{
-		static constexpr bool value = false;
-	};
-
-	template <typename T, std::size_t N> struct IsStdArray<std::array<T, N>>
-	{
-		static constexpr bool value = true;
-	};
-
 public:
 	template <typename T>
 	Destination(T &value) noexcept
@@ -56,38 +47,22 @@ public:
 	    , _end(nullptr)
 	    , _storeFunction(nullptr)
 	{
-		if constexpr(IsStdArray<T>::value)
+		if constexpr(IsArray_v<T>)
 		{
-			if constexpr(std::is_same_v<typename T::value_type, char>)
+			if constexpr(std::is_same_v<typename ArrayValue_t<T>, char>)
 			{
-				// std::array<char, N> is treated like a bounded string, this is
+				// arrays of char are treated like a bounded string, this is
 				// handled by cli::Parse()
-				_dest = &value;
+				_dest = ArrayGetData_v<T>(value);
 				_storeFunction = StoreImpl<T>;
 			}
 			else
 			{
-				// std::array<non_char, N> is treated like a bounded vector,
+				// arrays of non-chars are treated like a bounded vector,
 				// this is handled by this class
-				_dest = value.data();
-				_storeFunction = StoreImpl<typename T::value_type>;
-				_end = value.data() + value.size();
-			}
-		}
-		else if constexpr(std::is_array_v<T>)
-		{
-			// c style arrays share the same logic as std::array
-			using value_type = typename std::remove_extent_t<T>;
-			if constexpr(std::is_same_v<value_type, char>)
-			{
-				_dest = value;
-				_storeFunction = StoreImpl<T>;
-			}
-			else
-			{
-				_dest = value;
-				_storeFunction = StoreImpl<value_type>;
-				_end = value + (sizeof(T) / sizeof(value_type));
+				_dest = ArrayGetData_v<T>(value);
+				_storeFunction = StoreImpl<typename ArrayValue_t<T>>;
+				_end = ArrayGetData_v<T>(value) + ArraySize_v<T>;
 			}
 		}
 		else

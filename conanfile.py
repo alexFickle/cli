@@ -13,4 +13,4 @@ class CLIConanFile(ConanFile):
         cmake.configure()
         cmake.build()
         if not tools.cross_building(self.settings):
-            cmake.test()
+            cmake.test(output_on_failure=True)

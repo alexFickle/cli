@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 include(GoogleTest)
 
 add_executable(test_cli
+    array_traits_test.cpp
     parse_test.cpp
     destination_test.cpp
 )
