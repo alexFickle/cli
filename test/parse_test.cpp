@@ -62,6 +62,19 @@ TEST(parse, vector)
 	ASSERT_EQ(2, vector[1]);
 }
 
+TEST(parse, optional_vector)
+{
+	std::optional<std::vector<int>> maybeVector;
+
+	ASSERT_THROW(cli::Parse(maybeVector, "bad"), std::invalid_argument);
+	ASSERT_FALSE(maybeVector.has_value());
+
+	cli::Parse(maybeVector, "1");
+	cli::Parse(maybeVector, "2");
+	ASSERT_TRUE(maybeVector.has_value());
+	ASSERT_EQ(2, maybeVector->size());
+}
+
 TEST(parse, set)
 {
 	std::set<int> set;

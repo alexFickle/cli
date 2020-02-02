@@ -138,14 +138,21 @@ void Parse(std::array<char, N> &array, const char *input)
 
 template <typename T> void Parse(std::optional<T> &optional, const char *input)
 {
-	optional.emplace();
+	const bool startedEmpty = !optional.has_value();
+	if(startedEmpty)
+	{
+		optional.emplace();
+	}
 	try
 	{
 		cli::Parse(*optional, input);
 	}
 	catch(...)
 	{
-		optional.reset();
+		if(startedEmpty)
+		{
+			optional.reset();
+		}
 		throw;
 	}
 }
