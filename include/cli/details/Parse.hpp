@@ -81,36 +81,40 @@ template <typename T> void Parse(std::optional<T> &optional, const char *input)
 }
 
 
-template <typename... Ts>
-void Parse(std::vector<Ts...> &vector, const char *input)
+template <typename T, typename Allocator>
+void Parse(std::vector<T, Allocator> &vector, const char *input)
 {
-	typename std::vector<Ts...>::value_type value;
+	T value;
 	cli::Parse(value, input);
 	vector.push_back(std::move(value));
 }
 
 
-template <typename... Ts> void Parse(std::set<Ts...> &set, const char *input)
+template <typename T, typename Allocator>
+void Parse(std::set<T, Allocator> &set, const char *input)
 {
-	typename std::set<Ts...>::value_type value;
+	T value;
 	cli::Parse(value, input);
 	(void)set.insert(std::move(value));
 }
 
 
-template <typename... Ts>
-void Parse(std::unordered_set<Ts...> &set, const char *input)
+template <typename T, typename Hash, typename Equal, typename Allocator>
+void Parse(
+    std::unordered_set<T, Hash, Equal, Allocator> &set,
+    const char *input)
 {
-	typename std::unordered_set<Ts...>::value_type value;
+	T value;
 	cli::Parse(value, input);
 	(void)set.insert(std::move(value));
 }
 
 
-template <typename... Ts> void Parse(std::map<Ts...> &map, const char *input)
+template <typename Key, typename T, typename Compare, typename Allocator>
+void Parse(std::map<Key, T, Compare, Allocator> &map, const char *input)
 {
-	typename std::map<Ts...>::key_type key;
-	typename std::map<Ts...>::mapped_type value;
+	Key key;
+	T value;
 	const char *const end = input + std::strlen(input);
 	const char *const equal = std::find(input, end, '=');
 	if(equal == end)
@@ -124,11 +128,18 @@ template <typename... Ts> void Parse(std::map<Ts...> &map, const char *input)
 }
 
 
-template <typename... Ts>
-void Parse(std::unordered_map<Ts...> &map, const char *input)
+template <
+    typename Key,
+    typename T,
+    typename Hash,
+    typename Equal,
+    typename Allocator>
+void Parse(
+    std::unordered_map<Key, T, Hash, Equal, Allocator> &map,
+    const char *input)
 {
-	typename std::unordered_map<Ts...>::key_type key;
-	typename std::unordered_map<Ts...>::mapped_type value;
+	Key key;
+	T value;
 	const char *const end = input + std::strlen(input);
 	const char *const equal = std::find(input, end, '=');
 	if(equal == end)

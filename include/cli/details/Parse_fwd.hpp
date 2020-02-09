@@ -31,18 +31,29 @@ void Parse(std::array<char, N> &array, const char *input);
 
 template <typename T> void Parse(std::optional<T> &optional, const char *input);
 
-template <typename... Ts>
-void Parse(std::vector<Ts...> &vector, const char *input);
+template <typename T, typename Allocator>
+void Parse(std::vector<T, Allocator> &vector, const char *input);
 
-template <typename... Ts> void Parse(std::set<Ts...> &set, const char *input);
+template <typename T, typename Allocator>
+void Parse(std::set<T, Allocator> &set, const char *input);
 
-template <typename... Ts>
-void Parse(std::unordered_set<Ts...> &set, const char *input);
+template <typename T, typename Hash, typename Equal, typename Allocator>
+void Parse(
+    std::unordered_set<T, Hash, Equal, Allocator> &set,
+    const char *input);
 
-template <typename... Ts> void Parse(std::map<Ts...> &map, const char *input);
+template <typename Key, typename T, typename Compare, typename Allocator>
+void Parse(std::map<Key, T, Compare, Allocator> &map, const char *input);
 
-template <typename... Ts>
-void Parse(std::unordered_map<Ts...> &map, const char *input);
+template <
+    typename Key,
+    typename T,
+    typename Hash,
+    typename Equal,
+    typename Allocator>
+void Parse(
+    std::unordered_map<Key, T, Hash, Equal, Allocator> &map,
+    const char *input);
 
 
 } // namespace details
