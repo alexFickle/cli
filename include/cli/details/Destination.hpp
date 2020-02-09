@@ -49,7 +49,7 @@ public:
 	{
 		if constexpr(IsArray_v<T>)
 		{
-			if constexpr(std::is_same_v<typename ArrayValue_t<T>, char>)
+			if constexpr(std::is_same_v<ArrayValue_t<T>, char>)
 			{
 				// arrays of char are treated like a bounded string, this is
 				// handled by cli::Parse()
@@ -61,7 +61,7 @@ public:
 				// arrays of non-chars are treated like a bounded vector,
 				// this is handled by this class
 				_dest = ArrayGetData_v<T>(value);
-				_storeFunction = StoreImpl<typename ArrayValue_t<T>>;
+				_storeFunction = StoreImpl<ArrayValue_t<T>>;
 				_end = ArrayGetData_v<T>(value) + ArraySize_v<T>;
 			}
 		}

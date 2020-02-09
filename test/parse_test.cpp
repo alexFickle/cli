@@ -165,20 +165,10 @@ struct UserParseable : Streamable
 	bool parseCalled = false;
 };
 
-} // namespace
-
-namespace cli::user
-{
-
-void Parse(UserParseable &value, const char *input)
+void CLIParse(UserParseable &value, const char *input)
 {
 	value.parseCalled = true;
 }
-
-} // namespace cli::user
-
-namespace
-{
 
 TEST(parse, user_parseable)
 {

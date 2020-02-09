@@ -18,12 +18,31 @@ namespace cli
 namespace details
 {
 
+template <typename T> constexpr Arity GetDefaultArity(const T &);
 
-template <typename T> constexpr Arity GetDefaultArity(const T &) noexcept
+template <typename T> constexpr Arity GetDefaultArity(const std::optional<T> &);
+
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::vector<Ts...> &);
+
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::set<Ts...> &);
+
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::unordered_set<Ts...> &);
+
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::map<Ts...> &);
+
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::unordered_map<Ts...> &);
+
+
+template <typename T> constexpr Arity GetDefaultArity(const T &)
 {
 	if constexpr(IsArray_v<T>)
 	{
-		if constexpr(std::is_same_v<typename ArrayValue_t<T>, char>)
+		if constexpr(std::is_same_v<ArrayValue_t<T>, char>)
 		{
 			// string like array
 			return Arity::Exactly(1);
@@ -39,47 +58,39 @@ template <typename T> constexpr Arity GetDefaultArity(const T &) noexcept
 	}
 }
 
-template <typename T>
-constexpr Arity GetDefaultArity(const std::optional<T> &) noexcept
+template <typename T> constexpr Arity GetDefaultArity(const std::optional<T> &)
 {
 	const T value{};
 	const Arity valueArity = GetDefaultArity(value);
 	return Arity::NoMoreThan(valueArity.inclusiveMax);
 }
 
-template <typename T, typename Allocator>
-constexpr Arity GetDefaultArity(const std::vector<T, Allocator> &) noexcept
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::vector<Ts...> &)
 {
 	return Arity::Unbounded();
 }
 
-template <typename T, typename Allocator>
-constexpr Arity GetDefaultArity(const std::set<T, Allocator> &)
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::set<Ts...> &)
 {
 	return Arity::Unbounded();
 }
 
-template <typename T, typename Hash, typename Equal, typename Allocator>
-constexpr Arity
-GetDefaultArity(const std::unordered_set<T, Hash, Equal, Allocator> &)
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::unordered_set<Ts...> &)
 {
 	return Arity::Unbounded();
 }
 
-template <typename Key, typename T, typename Compare, typename Allocator>
-constexpr Arity GetDefaultArity(const std::map<Key, T, Compare, Allocator> &)
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::map<Ts...> &)
 {
 	return Arity::Unbounded();
 }
 
-template <
-    typename Key,
-    typename T,
-    typename Hash,
-    typename Equal,
-    typename Allocator>
-constexpr Arity
-GetDefaultArity(const std::unordered_map<Key, T, Hash, Equal, Allocator> &)
+template <typename... Ts>
+constexpr Arity GetDefaultArity(const std::unordered_map<Ts...> &)
 {
 	return Arity::Unbounded();
 }

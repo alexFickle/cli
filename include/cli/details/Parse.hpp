@@ -28,83 +28,6 @@ namespace details
 {
 
 
-/// @brief Detector for user defined parse functions.
-/// @details A user defined parse function has the highest priority within
-/// cli::Parse().  The signature of these functions are
-/// "void cli::user::Parse(T &, const char *)".
-template <typename T> struct HasUserDefinedParse
-{
-private:
-	template <typename U>
-	static constexpr decltype(
-	    cli::user::Parse(std::declval<U &>(), std::declval<const char *>()),
-	    bool())
-	Test(int)
-	{
-		return true;
-	}
-
-	template <typename U> static constexpr bool Test(...)
-	{
-		return false;
-	}
-
-public:
-	static constexpr bool value = Test<T>(int());
-};
-
-
-/// @brief Detector for an internal parse function.
-/// @details These parse functions have the signature
-/// "void cli::details::Parse(T &, const char *)" and are considered if
-/// no suitable user defined parser exists.
-template <typename T> struct HasInternalParse
-{
-private:
-	template <typename U>
-	static constexpr decltype(
-	    cli::details::Parse(std::declval<U &>(), std::declval<const char *>()),
-	    bool())
-	Test(int)
-	{
-		return true;
-	}
-
-	template <typename U> static constexpr bool Test(...)
-	{
-		return false;
-	}
-
-public:
-	static constexpr bool value = Test<T>(int());
-};
-
-
-/// @brief Detector for a stream extraction operator.
-/// @details Using a stream extraction operator with a std::istringstream is
-/// considered only if there is no suitable user defined or internal parser.
-template <typename T> struct HasStreamExtraction
-{
-private:
-	template <typename U>
-	static constexpr decltype(
-	    std::declval<std::istringstream>() >> std::declval<U &>(),
-	    bool())
-	Test(int)
-	{
-		return true;
-	}
-
-	template <typename U> static constexpr bool Test(...)
-	{
-		return false;
-	}
-
-public:
-	static constexpr bool value = Test<T>(int());
-};
-
-
 inline void Parse(std::string &string, const char *input)
 {
 	string = input;
@@ -158,40 +81,36 @@ template <typename T> void Parse(std::optional<T> &optional, const char *input)
 }
 
 
-template <typename T, typename Allocator>
-void Parse(std::vector<T, Allocator> &vector, const char *input)
+template <typename... Ts>
+void Parse(std::vector<Ts...> &vector, const char *input)
 {
-	T value;
+	typename std::vector<Ts...>::value_type value;
 	cli::Parse(value, input);
 	vector.push_back(std::move(value));
 }
 
 
-template <typename T, typename Allocator>
-void Parse(std::set<T, Allocator> &set, const char *input)
+template <typename... Ts> void Parse(std::set<Ts...> &set, const char *input)
 {
-	T value;
+	typename std::set<Ts...>::value_type value;
 	cli::Parse(value, input);
 	(void)set.insert(std::move(value));
 }
 
 
-template <typename T, typename Hash, typename Equal, typename Allocator>
-void Parse(
-    std::unordered_set<T, Hash, Equal, Allocator> &set,
-    const char *input)
+template <typename... Ts>
+void Parse(std::unordered_set<Ts...> &set, const char *input)
 {
-	T value;
+	typename std::unordered_set<Ts...>::value_type value;
 	cli::Parse(value, input);
 	(void)set.insert(std::move(value));
 }
 
 
-template <typename Key, typename T, typename Compare, typename Allocator>
-void Parse(std::map<Key, T, Compare, Allocator> &map, const char *input)
+template <typename... Ts> void Parse(std::map<Ts...> &map, const char *input)
 {
-	Key key;
-	T value;
+	typename std::map<Ts...>::key_type key;
+	typename std::map<Ts...>::mapped_type value;
 	const char *const end = input + std::strlen(input);
 	const char *const equal = std::find(input, end, '=');
 	if(equal == end)
@@ -205,18 +124,11 @@ void Parse(std::map<Key, T, Compare, Allocator> &map, const char *input)
 }
 
 
-template <
-    typename Key,
-    typename T,
-    typename Hash,
-    typename Equal,
-    typename Allocator>
-void Parse(
-    std::unordered_map<Key, T, Hash, Equal, Allocator> &map,
-    const char *input)
+template <typename... Ts>
+void Parse(std::unordered_map<Ts...> &map, const char *input)
 {
-	Key key;
-	T value;
+	typename std::unordered_map<Ts...>::key_type key;
+	typename std::unordered_map<Ts...>::mapped_type value;
 	const char *const end = input + std::strlen(input);
 	const char *const equal = std::find(input, end, '=');
 	if(equal == end)
