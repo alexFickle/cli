@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
-function(add_example NAME)
-    add_executable(${NAME}_example ${NAME}_example.cpp)
-    target_link_libraries(${NAME}_example cli)
-endfunction()
+include(add_example.cmake)
 
-add_example(fake)
+add_example(basic
+    TEST
+    TEST 1 2 --flag test)
+
