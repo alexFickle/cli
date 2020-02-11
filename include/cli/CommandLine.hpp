@@ -51,7 +51,7 @@ public:
 		_numPositionals = startFlagsIt - _args.begin();
 	}
 
-	void Run(const char *name, const char *const *argv, int argc)
+	void Run(const char *name, int argc, const char *const *argv)
 	{
 		if(argc < 0)
 		{
@@ -174,7 +174,7 @@ public:
 		}
 	}
 
-	void Run(const char *const *argv, int argc)
+	void Run(int argc, const char *const *argv)
 	{
 		if(argc < 1)
 		{
@@ -188,7 +188,7 @@ public:
 			    "Invalid argument to cli::CommandLine::Run(argv, argc).  argv "
 			    "can not be NULL.");
 		}
-		Run(*argv, argv + 1, argc - 1);
+		Run(*argv, argc - 1, argv + 1);
 	}
 
 private:

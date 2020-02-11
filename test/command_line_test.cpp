@@ -14,7 +14,7 @@ TEST(command_line, flag)
 	cli::CommandLine test(
 	    "test", {cli::Argument("--flag", value, "test flag")});
 	std::array<const char *, 2> args{"--flag", "1"};
-	test.Run("test", args.data(), 2);
+	test.Run("test", 2, args.data());
 	ASSERT_TRUE(value.has_value());
 	ASSERT_EQ(1, *value);
 }
@@ -26,7 +26,7 @@ TEST(command_line, positional)
 	cli::CommandLine test(
 	    "test", {cli::Argument("value", value, "test positional")});
 	std::array<const char *, 1> args{"1"};
-	test.Run("test", args.data(), 1);
+	test.Run("test", 1, args.data());
 	ASSERT_TRUE(value.has_value());
 	ASSERT_EQ(1, *value);
 }
