@@ -21,7 +21,7 @@ struct Argument
 
 	template <typename T>
 	Argument(const char *name_, T &dest_, const char *help_)
-	    : Argument(name_, dest_, details::GetDefaultArity(dest), help_)
+	    : Argument(name_, dest_, details::GetDefaultArity(dest_), help_)
 	{}
 
 	const char *name;
