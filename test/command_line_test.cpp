@@ -1,3 +1,4 @@
+#include "cli/Argument.hpp"
 #include "cli/CommandLine.hpp"
 
 #include "gtest/gtest.h"

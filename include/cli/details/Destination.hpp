@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 
 namespace cli
@@ -41,6 +42,16 @@ private:
 	}
 
 public:
+	Destination(const Destination &other)
+	    : _dest(other._dest)
+	    , _end(other._end)
+	    , _storeFunction(other._storeFunction)
+	{}
+
+	Destination(Destination &other)
+	    : Destination(std::as_const(other))
+	{}
+
 	template <typename T>
 	Destination(T &value) noexcept
 	    : _dest(nullptr)

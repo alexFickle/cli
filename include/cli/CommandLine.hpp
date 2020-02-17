@@ -1,6 +1,7 @@
 #pragma once
 
-#include "cli/Argument.hpp"
+#include "cli/GenericArgument.hpp"
+#include "cli/details/Generator.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -20,10 +21,10 @@ class CommandLine
 private:
 	// contains all of the information needed about an argument during command
 	// line argument parsing.
-	struct ArgumentData : Argument
+	struct ArgumentData : GenericArgument
 	{
-		ArgumentData(const Argument &arg)
-		    : Argument(arg)
+		ArgumentData(const GenericArgument &arg)
+		    : GenericArgument(arg)
 		{}
 
 		std::size_t count = 0;
@@ -33,7 +34,7 @@ private:
 public:
 	CommandLine(
 	    const char *description,
-	    std::initializer_list<Argument> arguments)
+	    std::initializer_list<GenericArgument> arguments)
 	    : _description(description)
 	{
 		std::copy(
@@ -42,11 +43,11 @@ public:
 		std::vector<ArgumentData>::const_iterator startFlagsIt =
 		    std::stable_partition(
 		        _args.begin(), _args.end(), [](const ArgumentData &argData) {
-			        if(argData.name == nullptr)
+			        if(argData.GetName() == nullptr)
 			        {
 				        return true;
 			        }
-			        return std::strncmp("--", argData.name, 2) != 0;
+			        return std::strncmp("--", argData.GetName(), 2) != 0;
 		        });
 		_numPositionals = startFlagsIt - _args.begin();
 	}
@@ -81,95 +82,81 @@ public:
 			    it != _args.end();
 			    ++it)
 			{
-				lookup.emplace(it->name, it);
+				lookup.emplace(it->GetName(), it);
 			}
 			return lookup;
 		}();
 		auto positionalIt = _args.begin();
 		const auto positionalEnd = _args.begin() + _numPositionals;
-		auto activeFlagIt = _args.end();
 
-		for(auto cliIt = argv; cliIt != argv + argc; ++cliIt)
+		details::Generator generator(argv, argv + argc);
+
+		while(generator.Remaining() != 0)
 		{
-
-			if(*cliIt == nullptr)
+			const char *const arg = generator.Peek();
+			if(arg == nullptr)
 			{
 				throw std::invalid_argument(
 				    "Invalid argument to cli::CommandLine::Run(name, argv, "
 				    "argc).  Null pointer as string in argv.");
 			}
 
-
-			if(**cliIt == '-')
+			if(arg[0] == '-')
 			{
 				// this argument is a flag
-				auto flagEntry = flagLookup.find(*cliIt);
+				auto flagEntry = flagLookup.find(arg);
 				if(flagEntry == flagLookup.end())
 				{
 					throw std::invalid_argument(
 					    "Invalid command line arguments.  Unknown flag: "
-					    + std::string(*cliIt));
+					    + std::string(arg));
 				}
-
-				if(activeFlagIt != _args.end())
+				if(flagEntry->second->count
+				   == flagEntry->second->GetArity().inclusiveMax)
 				{
-					// but we expected a value
 					throw std::invalid_argument(
-					    "Invalid command line arguments.  Expected a value "
-					    "after "
-					    + std::string(activeFlagIt->name)
-					    + ", not another flag: " + flagEntry->second->name);
+					    "Invalid command line arguments.  " + std::string(arg)
+					    + " given more than the maximum of "
+					    + std::to_string(
+					          flagEntry->second->GetArity().inclusiveMax)
+					    + " time(s).");
 				}
-				activeFlagIt = flagEntry->second;
+				// progress passed the flag
+				generator.Next();
+				// and handle any value
+				flagEntry->second->Handle(generator);
+				flagEntry->second->count++;
 			}
 			else
 			{
-				// this argument is a value
-				if(activeFlagIt != _args.end())
+				// this argument is a positional
+				if(positionalIt == positionalEnd)
 				{
-					// argument is for a flag
-					if(activeFlagIt->count == activeFlagIt->arity.inclusiveMax)
-					{
-						throw std::invalid_argument(
-						    "Invalid command line arguments.  Flag "
-						    + std::string(activeFlagIt->name)
-						    + "used more than the maximum of "
-						    + std::to_string(activeFlagIt->arity.inclusiveMax)
-						    + " time(s).");
-					}
-					activeFlagIt->dest.Store(*cliIt);
-					activeFlagIt->count++;
-					activeFlagIt = _args.end();
+					throw std::invalid_argument(
+					    "Invalid command line arguments.  Unhandled "
+					    "argument: "
+					    + std::string(arg));
 				}
-				else
+				positionalIt->Handle(generator);
+				positionalIt->count++;
+				if(positionalIt->count == positionalIt->GetArity().inclusiveMax)
 				{
-					// argument is for a positional
-					if(positionalIt == positionalEnd)
-					{
-						throw std::invalid_argument(
-						    "Invalid command line arguments.  Unhandled "
-						    "argument: "
-						    + std::string(*cliIt));
-					}
-					positionalIt->dest.Store(*cliIt);
-					positionalIt->count++;
-					if(positionalIt->count == positionalIt->arity.inclusiveMax)
-					{
-						++positionalIt;
-					}
+					++positionalIt;
 				}
 			}
 		}
 
 		for(const ArgumentData &arg : _args)
 		{
-			if(arg.count < arg.arity.inclusiveMin)
+			if(arg.count < arg.GetArity().inclusiveMin)
 			{
 				throw std::invalid_argument(
-				    "Invalid command line arguments.  " + std::string(arg.name)
-				    + " given " + std::to_string(arg.count)
+				    "Invalid command line arguments.  "
+				    + std::string(arg.GetName()) + " given "
+				    + std::to_string(arg.count)
 				    + " value(s), less than the minimum of "
-				    + std::to_string(arg.arity.inclusiveMin) + " value(s).");
+				    + std::to_string(arg.GetArity().inclusiveMin)
+				    + " value(s).");
 			}
 		}
 	}
