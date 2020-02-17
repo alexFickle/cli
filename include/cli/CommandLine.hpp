@@ -57,13 +57,13 @@ public:
 		if(argc < 0)
 		{
 			throw std::invalid_argument(
-			    "Invalid argument to cli::CommandLine::Run(name, argv, argc).  "
+			    "Invalid argument to cli::CommandLine::Run(name, argc, argv).  "
 			    "argc must be non-negative");
 		}
 		if(argv == nullptr)
 		{
 			throw std::invalid_argument(
-			    "Invalid argument to cli::CommandLine::Run(name, argv, argc).  "
+			    "Invalid argument to cli::CommandLine::Run(name, argc, argv).  "
 			    "argv must not be null.");
 		}
 
@@ -97,8 +97,8 @@ public:
 			if(arg == nullptr)
 			{
 				throw std::invalid_argument(
-				    "Invalid argument to cli::CommandLine::Run(name, argv, "
-				    "argc).  Null pointer as string in argv.");
+				    "Invalid argument to cli::CommandLine::Run(name, argc, "
+				    "argv).  Null pointer as string in argv.");
 			}
 
 			if(arg[0] == '-')
@@ -166,13 +166,13 @@ public:
 		if(argc < 1)
 		{
 			throw std::invalid_argument(
-			    "Invalid argument to cli::CommandLine::Run(argv, argc).  argc "
+			    "Invalid argument to cli::CommandLine::Run(argc, argv).  argc "
 			    "must be at least one.");
 		}
 		if(argv == nullptr)
 		{
 			throw std::invalid_argument(
-			    "Invalid argument to cli::CommandLine::Run(argv, argc).  argv "
+			    "Invalid argument to cli::CommandLine::Run(argc, argv).  argv "
 			    "can not be NULL.");
 		}
 		Run(*argv, argc - 1, argv + 1);
