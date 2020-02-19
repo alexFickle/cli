@@ -3,7 +3,9 @@
 #include "cli/Arity.hpp"
 #include "cli/details/Destination.hpp"
 #include "cli/details/Generator.hpp"
+#include "cli/details/Usage.hpp"
 
+#include <string>
 #include <utility>
 #include <variant>
 
@@ -17,9 +19,11 @@ class GenericArgument
 public:
 	enum class Kind
 	{
-		NORMAL
+		NORMAL,
+		HELP
 	};
 
+private:
 	struct NormalState
 	{
 		details::Destination destination;
@@ -31,6 +35,9 @@ public:
 		{}
 	};
 
+	struct HelpState
+	{};
+
 public:
 	/// @brief Constructor for a normal argument.
 	/// @details Do not call directly, use cli::Argument().
@@ -41,6 +48,13 @@ public:
 	    const char *help)
 	    : _name(name)
 	    , _state(std::in_place_type<NormalState>, destination, arity)
+	    , _help(help)
+	{}
+
+	/// @brief Constructor for help.
+	GenericArgument(const char *name, const char *help)
+	    : _name(name)
+	    , _state(std::in_place_type<HelpState>)
 	    , _help(help)
 	{}
 
@@ -94,19 +108,37 @@ public:
 				state.destination.Store(generator.Next());
 				break;
 			}
+
+			default:
+				break;
 		}
 	}
 
-	/// @brief Gets a string to use in the help message for this argument.
-	const char *GetHelp() const noexcept
+	/// @brief Gets a string to use in the usage message for this argument.
+	std::string GetUsage() const
 	{
-		return _help;
+		if(GetKind() == Kind::NORMAL && GetName()[0] == '-')
+		{
+			return details::MakeUsageString(
+			    std::string(GetName()) + ' ' + (GetName() + 2), GetArity());
+		}
+		return details::MakeUsageString(GetName(), GetArity());
 	}
 
+	/// @brief Gets a string to use in the help message for this argument.
+	std::string GetHelp() const
+	{
+		if(GetKind() == Kind::NORMAL && GetName()[0] == '-')
+		{
+			return std::string(GetName()) + ' ' + (GetName() + 2) + ": "
+			    + _help;
+		}
+		return std::string(GetName()) + ": " + _help;
+	}
 
 private:
 	const char *_name;
-	std::variant<NormalState> _state;
+	std::variant<NormalState, HelpState> _state;
 	const char *_help;
 };
 

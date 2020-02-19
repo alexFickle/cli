@@ -4,5 +4,6 @@ include(add_example.cmake)
 
 add_example(basic
     TEST
+    TEST --help
     TEST 1 2 --flag test)
 

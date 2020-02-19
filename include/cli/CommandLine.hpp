@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstring>
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <stdexcept>
 #include <string>
@@ -52,7 +53,37 @@ public:
 		_numPositionals = startFlagsIt - _args.begin();
 	}
 
-	void Run(const char *name, int argc, const char *const *argv)
+	std::string GetUsage(const char *name) const
+	{
+		std::string usage = name;
+		for(const ArgumentData &arg : _args)
+		{
+			usage += ' ';
+			usage += arg.GetUsage();
+		}
+		return usage;
+	}
+
+	/// @brief Gets a help message for this command line.
+	std::string GetHelp(const char *name) const
+	{
+		std::string help = _description;
+		help += "\n\n";
+
+		help += "Usage: \n  " + GetUsage(name);
+		help += "\n\n";
+
+		help += "Arguments: \n";
+		for(const ArgumentData &arg : _args)
+		{
+			help += "  ";
+			help += arg.GetHelp();
+			help += '\n';
+		}
+		return help;
+	}
+
+	bool Run(const char *name, int argc, const char *const *argv)
 	{
 		if(argc < 0)
 		{
@@ -121,6 +152,11 @@ public:
 					          flagEntry->second->GetArity().inclusiveMax)
 					    + " time(s).");
 				}
+				if(flagEntry->second->GetKind() == GenericArgument::Kind::HELP)
+				{
+					std::cout << GetHelp(name);
+					return true;
+				}
 				// progress passed the flag
 				generator.Next();
 				// and handle any value
@@ -159,9 +195,10 @@ public:
 				    + " value(s).");
 			}
 		}
+		return false;
 	}
 
-	void Run(int argc, const char *const *argv)
+	bool Run(int argc, const char *const *argv)
 	{
 		if(argc < 1)
 		{
@@ -175,7 +212,7 @@ public:
 			    "Invalid argument to cli::CommandLine::Run(argc, argv).  argv "
 			    "can not be NULL.");
 		}
-		Run(*argv, argc - 1, argv + 1);
+		return Run(*argv, argc - 1, argv + 1);
 	}
 
 private:

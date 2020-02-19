@@ -14,12 +14,17 @@ int main(int argc, const char *const *argv)
 
 	cli::CommandLine commandLine(
 	    "Basic example command line.",
-	    {cli::Argument("numbers", numbers, "positional args"),
+	    {cli::Help("--help"),
+	     cli::Argument("numbers", numbers, "positional args"),
 	     cli::Argument("--flag", flag, "optional flag")});
 
 	try
 	{
-		commandLine.Run(argc, argv);
+		if(commandLine.Run(argc, argv))
+		{
+			// --help was given
+			return 0;
+		}
 	}
 	catch(const std::exception &e)
 	{
@@ -27,5 +32,6 @@ int main(int argc, const char *const *argv)
 		return 1;
 	}
 
+	// use numbers and flag
 	return 0;
 }
