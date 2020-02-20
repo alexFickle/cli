@@ -5,6 +5,7 @@
 #include "cli/details/Generator.hpp"
 #include "cli/details/Usage.hpp"
 
+#include <cassert>
 #include <string>
 #include <utility>
 #include <variant>
@@ -20,7 +21,9 @@ public:
 	enum class Kind
 	{
 		NORMAL,
-		HELP
+		HELP,
+		USAGE,
+		VERSION
 	};
 
 private:
@@ -38,10 +41,23 @@ private:
 	struct HelpState
 	{};
 
+	struct UsageState
+	{};
+
+	struct VersionState
+	{
+		const char *version;
+
+		VersionState(const char *version_)
+		    : version(version_)
+		{}
+	};
+
 public:
 	/// @brief Constructor for a normal argument.
 	/// @details Do not call directly, use cli::Argument().
 	GenericArgument(
+	    Kind kind,
 	    const char *name,
 	    details::Destination destination,
 	    Arity arity,
@@ -49,14 +65,42 @@ public:
 	    : _name(name)
 	    , _state(std::in_place_type<NormalState>, destination, arity)
 	    , _help(help)
-	{}
+	{
+		assert(kind == Kind::NORMAL);
+	}
 
-	/// @brief Constructor for help.
-	GenericArgument(const char *name, const char *help)
+	/// @brief Constructor for help and usage.
+	GenericArgument(Kind kind, const char *name, const char *help)
 	    : _name(name)
 	    , _state(std::in_place_type<HelpState>)
 	    , _help(help)
-	{}
+	{
+		switch(kind)
+		{
+			case Kind::HELP:
+				break; // already constructed
+
+			case Kind::USAGE:
+				_state.emplace<static_cast<std::size_t>(Kind::USAGE)>();
+				break;
+
+			default:
+				assert(false);
+		}
+	}
+
+	/// @brief Constructor for version.
+	GenericArgument(
+	    Kind kind,
+	    const char *name,
+	    const char *version,
+	    const char *help)
+	    : _name(name)
+	    , _state(std::in_place_type<VersionState>, version)
+	    , _help(help)
+	{
+		assert(kind == Kind::VERSION);
+	}
 
 	/// @brief Gets the name of this argument.
 	const char *GetName() const noexcept
@@ -114,6 +158,17 @@ public:
 		}
 	}
 
+	const char *GetVersion() const
+	{
+		if(GetKind() == Kind::VERSION)
+		{
+			const VersionState &state =
+			    std::get<static_cast<std::size_t>(Kind::VERSION)>(_state);
+			return state.version;
+		}
+		return "";
+	}
+
 	/// @brief Gets a string to use in the usage message for this argument.
 	std::string GetUsage() const
 	{
@@ -138,7 +193,7 @@ public:
 
 private:
 	const char *_name;
-	std::variant<NormalState, HelpState> _state;
+	std::variant<NormalState, HelpState, UsageState, VersionState> _state;
 	const char *_help;
 };
 

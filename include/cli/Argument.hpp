@@ -25,7 +25,11 @@ GenericArgument
 Argument(const char *name, T &destination, Arity arity, const char *help)
 {
 	return GenericArgument(
-	    name, details::Destination(destination), arity, help);
+	    GenericArgument::Kind::NORMAL,
+	    name,
+	    details::Destination(destination),
+	    arity,
+	    help);
 }
 
 /// @brief Creates a command line argument with deduced arity.

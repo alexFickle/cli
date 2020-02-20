@@ -15,6 +15,8 @@ int main(int argc, const char *const *argv)
 	cli::CommandLine commandLine(
 	    "Basic example command line.",
 	    {cli::Help("--help"),
+	     cli::Usage("--usage"),
+	     cli::Version("--version", "1.0.0"),
 	     cli::Argument("numbers", numbers, "positional args"),
 	     cli::Argument("--flag", flag, "optional flag")});
 

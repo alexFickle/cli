@@ -152,10 +152,20 @@ public:
 					          flagEntry->second->GetArity().inclusiveMax)
 					    + " time(s).");
 				}
-				if(flagEntry->second->GetKind() == GenericArgument::Kind::HELP)
+				// handle special flags that trigger parser exit
+				switch(flagEntry->second->GetKind())
 				{
-					std::cout << GetHelp(name);
-					return true;
+					case GenericArgument::Kind::HELP:
+						std::cout << GetHelp(name);
+						return true;
+					case GenericArgument::Kind::USAGE:
+						std::cout << GetUsage(name);
+						return true;
+					case GenericArgument::Kind::VERSION:
+						std::cout << flagEntry->second->GetVersion() << '\n';
+						return true;
+					default:
+						break;
 				}
 				// progress passed the flag
 				generator.Next();
