@@ -23,7 +23,8 @@ public:
 		NORMAL,
 		HELP,
 		USAGE,
-		VERSION
+		VERSION,
+		BOOL
 	};
 
 private:
@@ -50,6 +51,15 @@ private:
 
 		VersionState(const char *version_)
 		    : version(version_)
+		{}
+	};
+
+	struct BoolState
+	{
+		bool *destination;
+
+		BoolState(bool &destination_)
+		    : destination(&destination_)
 		{}
 	};
 
@@ -100,6 +110,19 @@ public:
 	    , _help(help)
 	{
 		assert(kind == Kind::VERSION);
+	}
+
+	/// @brief Constructor for StoreTrue and StoreFalse
+	GenericArgument(
+	    Kind kind,
+	    const char *name,
+	    bool &destination,
+	    const char *help)
+	    : _name(name)
+	    , _state(std::in_place_type<BoolState>, destination)
+	    , _help(help)
+	{
+		assert(kind == Kind::BOOL);
 	}
 
 	/// @brief Gets the name of this argument.
@@ -153,6 +176,15 @@ public:
 				break;
 			}
 
+			case Kind::BOOL:
+			{
+				BoolState &state =
+				    std::get<static_cast<std::size_t>(Kind::BOOL)>(_state);
+				// boolean flags are initialized in their inactive state, just
+				// need to flip it
+				*state.destination = !*state.destination;
+			}
+
 			default:
 				break;
 		}
@@ -193,7 +225,8 @@ public:
 
 private:
 	const char *_name;
-	std::variant<NormalState, HelpState, UsageState, VersionState> _state;
+	std::variant<NormalState, HelpState, UsageState, VersionState, BoolState>
+	    _state;
 	const char *_help;
 };
 

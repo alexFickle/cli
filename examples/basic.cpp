@@ -11,6 +11,7 @@ int main(int argc, const char *const *argv)
 {
 	std::vector<int> numbers;
 	std::optional<std::string> flag;
+	bool isBoolFlagGiven;
 
 	cli::CommandLine commandLine(
 	    "Basic example command line.",
@@ -18,13 +19,14 @@ int main(int argc, const char *const *argv)
 	     cli::Usage("--usage"),
 	     cli::Version("--version", "1.0.0"),
 	     cli::Argument("numbers", numbers, "positional args"),
-	     cli::Argument("--flag", flag, "optional flag")});
+	     cli::Argument("--flag", flag, "optional flag"),
+	     cli::StoreTrue("--bool", isBoolFlagGiven, "argumentless flag")});
 
 	try
 	{
 		if(commandLine.Run(argc, argv))
 		{
-			// --help was given
+			// informational flag was given
 			return 0;
 		}
 	}
@@ -34,6 +36,9 @@ int main(int argc, const char *const *argv)
 		return 1;
 	}
 
-	// use numbers and flag
+	// use command line arguments
+	std::cout << numbers.size() << std::endl;
+	std::cout << flag.value_or("<flag not given>") << std::endl;
+	std::cout << isBoolFlagGiven << std::endl;
 	return 0;
 }

@@ -7,5 +7,5 @@ add_example(basic
     TEST --help
     TEST --usage
     TEST --version
-    TEST 1 2 --flag test)
+    TEST 1 2 --bool --flag test)
 
