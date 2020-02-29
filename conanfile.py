@@ -13,7 +13,8 @@ class CLIConanFile(ConanFile):
     generators = "cmake"
     exports_sources = ("examples/*", "include/*", "test/*", "CMakeLists.txt",
                        "LICENSE")
-
+    # https://github.com/alexFickle/keyword
+    requires = "keyword/0.0.0@fickle/testing"
     build_requires = "gtest/1.8.1@bincrafters/stable"
 
     def build(self):

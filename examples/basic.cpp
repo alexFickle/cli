@@ -13,14 +13,17 @@ int main(int argc, const char *const *argv)
 	std::optional<std::string> flag;
 	bool isBoolFlagGiven;
 
+	using cli::help;
+
 	cli::CommandLine commandLine(
 	    "Basic example command line.",
 	    {cli::Help("--help"),
 	     cli::Usage("--usage"),
 	     cli::Version("--version", "1.0.0"),
-	     cli::Argument("numbers", numbers, "positional args"),
-	     cli::Argument("--flag", flag, "optional flag"),
-	     cli::StoreTrue("--bool", isBoolFlagGiven, "argumentless flag")});
+	     cli::Argument("numbers", numbers, help = "positional args"),
+	     cli::Argument("--flag", flag, help = "optional flag"),
+	     cli::StoreTrue(
+	         "--bool", isBoolFlagGiven, help = "argumentless flag")});
 
 	try
 	{

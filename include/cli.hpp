@@ -6,4 +6,5 @@
 #include "cli/CommandLine.hpp"
 #include "cli/GenericArgument.hpp"
 #include "cli/InfoFlags.hpp"
+#include "cli/Keywords.hpp"
 #include "cli/Parse.hpp"
